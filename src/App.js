@@ -1,19 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import './App.css';
 
 const accessKey = process.env.REACT_APP_UNSPLASH_ACCESS_KEY;
 
-export default function App() {
+const App = () => {
   const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState('');
 
-  useEffect(() => {
-    getPhotos();
-  }, [page]);
-
-  function getPhotos() {
+  const getPhotos = useCallback(() => {
     let apiUrl = `https://api.unsplash.com/photos?`;
     if (query) apiUrl = `https://api.unsplash.com/search/photos?query=${query}`;
     apiUrl += `&page=${page}`;
@@ -30,18 +26,22 @@ export default function App() {
         }
         setImages((images) => [...images, ...imagesFromApi]);
       });
-  }
+  }, [page, query]);
 
-  function searchPhotos(e) {
+  useEffect(() => {
+    getPhotos();
+  }, [page, getPhotos]);
+
+  const searchPhotos = (e) => {
     e.preventDefault();
     setPage(1);
     getPhotos();
-  }
+  };
 
   // return an error if there is no access key
   if (!accessKey) {
     return (
-      <a href='https://unsplash.com/developers' className='error'>
+      <a href='https://unsplash.com/developers'>
         Required: Get Your Unsplash API Key First
       </a>
     );
@@ -83,4 +83,6 @@ export default function App() {
       </InfiniteScroll>
     </div>
   );
-}
+};
+
+export default App;
